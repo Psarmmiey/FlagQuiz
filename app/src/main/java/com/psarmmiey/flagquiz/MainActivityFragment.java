@@ -113,4 +113,10 @@ public class MainActivityFragment extends Fragment {
         for (int row = 0; row < guessRows; row++)
             guessLinearLayouts[row].setVisibility(View.VISIBLE);
     }
+
+    // update world regions for quiz based on vaalues in SharedPreferences
+    public void updateRegions(SharedPreferences sharedPreferences) {
+        regionsSet =
+                sharedPreferences.getStringSet(MainActivity.REGIONS, null);
+    }
 }
