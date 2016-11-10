@@ -2,6 +2,7 @@
 // Contains the flag Quiz logic
 package com.psarmmiey.flagquiz;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -95,5 +96,21 @@ public class MainActivityFragment extends Fragment {
                 getString(R.string.question, 1, FLAGS_IN_QUIZ)
         );
         return view;
+    }
+
+    // update guessRows based on value in SharedPreferences
+    public void updateGuessRows(SharedPreferences sharedPreferences) {
+        // get the number of guess buttons that should be displayed
+        String choices =
+                sharedPreferences.getString(MainActivity.CHOICES, null);
+        guessRows = Integer.parseInt(choices) / 2;
+
+        // hide all quess button LinearLayouts
+        for (LinearLayout layout: guessLinearLayouts)
+            layout.setVisibility(View.GONE);
+
+        // display appropriate guess button LinearLayouts
+        for (int row = 0; row < guessRows; row++)
+            guessLinearLayouts[row].setVisibility(View.VISIBLE);
     }
 }
