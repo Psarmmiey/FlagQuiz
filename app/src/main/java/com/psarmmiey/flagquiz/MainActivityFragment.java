@@ -234,4 +234,9 @@ public class MainActivityFragment extends Fragment {
 
 
     }
+
+    // parses the country flag file name and returns the country name
+    private String getCountryName(String name) {
+        return name.substring(name.indexOf('-') + 1).replace('-', ' ');
+    }
 }
