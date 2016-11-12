@@ -3,8 +3,10 @@
 package com.psarmmiey.flagquiz;
 
 import android.content.SharedPreferences;
+import android.content.res.AssetManager;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +17,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import java.io.IOException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
@@ -118,5 +121,49 @@ public class MainActivityFragment extends Fragment {
     public void updateRegions(SharedPreferences sharedPreferences) {
         regionsSet =
                 sharedPreferences.getStringSet(MainActivity.REGIONS, null);
+    }
+
+    // set up and start the next quiz
+    public void resetQuiz() {
+        // use AssetManager to get image file names for enabled regions
+        AssetManager assets = getActivity().getAssets();
+        fileNameList.clear(); // empty list of image file name
+
+        try {
+            // loop through each region
+            for (String region : regionsSet) {
+                // get a list of all flag image files in this region
+                String[] paths = assets.list(region);
+
+                for (String path : paths)
+                    fileNameList.add(path.replace(".png", ""));
+            }
+        }
+        catch (IOException exception) {
+            Log.e(TAG, "Error loading image file names", exception);
+        }
+
+        correctAnswers = 0; // reset the number of correct answers made
+        totalGuesses = 0; // reset the total number of guesses the user made
+        quizCountriesList.clear(); // clear prior list of quiz countries
+
+        int flagCounter = 1;
+        int numberOfFlags = fileNameList.size();
+
+        // add FLAGS_IN_QUIZ random file names to the quizCountriesList
+       while (flagCounter <= FLAGS_IN_QUIZ) {
+           int randomIndex = random.nextInt(numberOfFlags);
+
+           // get the random file name
+           String fileName = fileNameList.get(randomIndex);
+
+           // if the region is enabled and it hasn't already been chosen
+           if (!quizCountriesList.contains(fileName)) {
+               quizCountriesList.add(fileName); // add the file to the list
+               ++flagCounter;
+           }
+       }
+
+        loadNextFlag(); // start the quiz by loading the first flag
     }
 }
