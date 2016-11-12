@@ -25,6 +25,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.os.Handler;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -33,7 +34,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import java.util.logging.Handler;
+
 import java.util.logging.LogRecord;
 
 /**
@@ -74,25 +75,9 @@ public class MainActivityFragment extends Fragment {
         fileNameList = new ArrayList<>(); // diamond operator
         quizCountriesList = new ArrayList<>();
         random = new SecureRandom();
-        handler = new Handler() {
-            @Override
-            public void publish(LogRecord logRecord) {
+        handler = new Handler();
 
-            }
 
-            public void postDelayed() {
-
-            }
-            @Override
-            public void flush() {
-
-            }
-
-            @Override
-            public void close() throws SecurityException {
-
-            }
-        };
         // load the shake animation that's used for incorrect answers
         shakeAnimation = AnimationUtils.loadAnimation(getActivity(),
                 R.anim.incorrect_shake);
@@ -119,7 +104,7 @@ public class MainActivityFragment extends Fragment {
         for (LinearLayout row : guessLinearLayouts) {
             for (int column = 0; column < row.getChildCount(); column++) {
                 Button button = (Button) row.getChildAt(column);
-                button.setOnClickListener(guessButtonListener;
+                button.setOnClickListener(guessButtonListener);
             }
         }
 
