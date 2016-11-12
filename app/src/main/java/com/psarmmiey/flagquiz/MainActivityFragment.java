@@ -4,11 +4,15 @@ package com.psarmmiey.flagquiz;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.res.AssetManager;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -76,6 +80,9 @@ public class MainActivityFragment extends Fragment {
 
             }
 
+            public void postDelayed() {
+
+            }
             @Override
             public void flush() {
 
@@ -86,7 +93,6 @@ public class MainActivityFragment extends Fragment {
 
             }
         };
-
         // load the shake animation that's used for incorrect answers
         shakeAnimation = AnimationUtils.loadAnimation(getActivity(),
                 R.anim.incorrect_shake);
@@ -302,4 +308,83 @@ public class MainActivityFragment extends Fragment {
         animator.setDuration(500); // set animation duration to 500ms
         animator.start(); // start the animation
     }
+
+    // called when a guess Button is touched
+    private View.OnClickListener guessButtonListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            Button guessButton = ((Button) view);
+            String guess = guessButton.getText().toString();
+            String answer = getCountryName(correctAnswer);
+            ++totalGuesses; // increment the number of guesses the user has made
+
+            if (guess.equals(answer)) { // if the guess is correct
+                ++correctAnswers; // increment the number of correct answers
+
+                // display correct answer in green text
+                answerTextView.setText(answer + "!");
+                answerTextView.setTextColor(
+                        getResources().getColor(R.color.correct_answer,
+                                getContext().getTheme())
+                );
+
+                disableButtons(); // disable all guess Buttons
+
+                // if the user has correctly identified FLAGS_IN_QUIZ flags
+                if (correctAnswers == FLAGS_IN_QUIZ) {
+                    // DialogFragment to display quiz stats and start new quiz
+                    DialogFragment quizResults;
+                    quizResults = new  DialogFragment() {
+                        // create an AlertDialog and return it
+                        @Override
+                        public Dialog onCreateDialog(Bundle bundle) {
+                            AlertDialog.Builder builder =
+                                    new AlertDialog.Builder(getActivity());
+                            builder.setMessage(
+                                    getString(R.string.results,
+                                            totalGuesses,
+                                            (1000/ (double) totalGuesses))
+                            );
+
+                            // "Reset Quiz" Button
+                            builder.setPositiveButton(R.string.reset_quiz,
+                                    new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int id) {
+                                            resetQuiz();
+                                        }
+                                    }
+                            );
+                            return builder.create(); // return the AlertDialog
+                        }
+                    };
+
+                    // use FragmentManager to display the DialogFragment
+                    quizResults.setCancelable(false);
+                    quizResults.show(getFragmentManager(), "quiz results");
+                }
+                else { // answer is correct but quiz is not over
+                    // load the next flag after a 2-second delay
+                    handler.postDelayed(
+                        new Runnable() {
+                            @Override
+                            public void run() {
+                                animate(true); // animate the flag off the screen
+                            }
+                        }, 2000); // 2000 milliseconds for 2-second delay
+                    }
+                }
+            else { // answer was incorrect
+                flagImageView.startAnimation(shakeAnimation); // play shake
+
+                // display "Incorrect!" in red
+                answerTextView.setText(R.string.incorrect_answer);
+                answerTextView.setTextColor(getResources().getColor(
+                        R.color.incorrect_answer,getContext().getTheme()
+                ));
+            }
+
+
+        }
+    };
 }
