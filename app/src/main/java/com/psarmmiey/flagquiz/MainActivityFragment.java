@@ -2,14 +2,18 @@
 // Contains the flag Quiz logic
 package com.psarmmiey.flagquiz;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.content.SharedPreferences;
 import android.content.res.AssetManager;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -26,6 +30,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Handler;
+import java.util.logging.LogRecord;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -65,7 +70,22 @@ public class MainActivityFragment extends Fragment {
         fileNameList = new ArrayList<>(); // diamond operator
         quizCountriesList = new ArrayList<>();
         random = new SecureRandom();
-        handler = new Handler();
+        handler = new Handler() {
+            @Override
+            public void publish(LogRecord logRecord) {
+
+            }
+
+            @Override
+            public void flush() {
+
+            }
+
+            @Override
+            public void close() throws SecurityException {
+
+            }
+        };
 
         // load the shake animation that's used for incorrect answers
         shakeAnimation = AnimationUtils.loadAnimation(getActivity(),
@@ -93,7 +113,7 @@ public class MainActivityFragment extends Fragment {
         for (LinearLayout row : guessLinearLayouts) {
             for (int column = 0; column < row.getChildCount(); column++) {
                 Button button = (Button) row.getChildAt(column);
-                button.setOnClickListener(guessButtonListener);
+                button.setOnClickListener(guessButtonListener;
             }
         }
 
@@ -236,7 +256,50 @@ public class MainActivityFragment extends Fragment {
     }
 
     // parses the country flag file name and returns the country name
+    @NonNull
     private String getCountryName(String name) {
         return name.substring(name.indexOf('-') + 1).replace('-', ' ');
+    }
+
+    // animate the entire quizLinearLayout on or off screen
+    private void animate(boolean animateOut) {
+        // prevent animation into the UI for the first flag
+        if (correctAnswers == 0) {
+            return;
+        }
+
+        // calculate center x and center y
+        int centerX = (quizLinearLayout.getLeft() +
+            quizLinearLayout.getRight()) / 2;
+        int centerY = (quizLinearLayout.getTop() +
+            quizLinearLayout.getBottom()) / 2;
+
+        // calculate animation radius
+        int radius = Math.max(quizLinearLayout.getWidth(),
+                quizLinearLayout.getHeight());
+
+        Animator animator;
+
+        // if the quizLinearLayout should animate out rather than in
+        if (animateOut) {
+            // create circular reveal animation
+            animator = ViewAnimationUtils.createCircularReveal(
+                    quizLinearLayout, centerX, centerY, radius, 0);
+            animator.addListener(
+                    new AnimatorListenerAdapter() {
+                        // called when the animation finishes
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            loadNextFlag();
+                        }
+                    }
+            );
+        }
+        else {  // if the quizLinearLayout should animate in
+            animator = ViewAnimationUtils.createCircularReveal(
+                    quizLinearLayout, centerX, centerY, 0, radius);
+            }
+        animator.setDuration(500); // set animation duration to 500ms
+        animator.start(); // start the animation
     }
 }
